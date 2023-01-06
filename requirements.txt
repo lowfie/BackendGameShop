@@ -5,3 +5,5 @@ SQLAlchemy==1.4.45
 asyncpg==0.27.0
 alembic==1.9.1
 environs==9.5.0
+fastapi-users==10.2.1
+
