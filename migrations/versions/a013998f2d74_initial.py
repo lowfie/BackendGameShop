@@ -1,8 +1,8 @@
-"""Create start models
+"""Initial
 
-Revision ID: 239f441a0795
+Revision ID: a013998f2d74
 Revises: 
-Create Date: 2023-01-03 16:11:56.389230
+Create Date: 2023-01-06 20:36:22.207610
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '239f441a0795'
+revision = 'a013998f2d74'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -32,14 +32,18 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('first_name', sa.String(length=30), nullable=True),
     sa.Column('last_name', sa.String(length=30), nullable=True),
-    sa.Column('nickname', sa.String(length=30), nullable=False),
+    sa.Column('nickname', sa.String(length=30), nullable=True),
     sa.Column('phone', sa.String(length=20), nullable=True),
-    sa.Column('email', sa.String(length=20), nullable=True),
+    sa.Column('email', sa.String(length=320), nullable=False),
+    sa.Column('hashed_password', sa.String(length=1024), nullable=False),
     sa.Column('date_of_registry', sa.DateTime(), nullable=True),
+    sa.Column('is_active', sa.Boolean(), nullable=False),
+    sa.Column('is_superuser', sa.Boolean(), nullable=False),
+    sa.Column('is_verified', sa.Boolean(), nullable=False),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('email'),
     sa.UniqueConstraint('phone')
     )
+    op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
     op.create_table('cart',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -76,6 +80,7 @@ def downgrade() -> None:
     op.drop_table('user_games')
     op.drop_table('reviews')
     op.drop_table('cart')
+    op.drop_index(op.f('ix_users_email'), table_name='users')
     op.drop_table('users')
     op.drop_table('games')
     # ### end Alembic commands ###
