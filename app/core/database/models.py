@@ -34,7 +34,7 @@ class Game(Base):
     __tablename__ = 'games'
 
     id: int = Column(Integer, primary_key=True, nullable=False)
-    title: str = Column(String(20), nullable=True)
+    title: str = Column(String(50), nullable=True)
     description: str = Column(Text, nullable=True)
     price: float = Column(Float, nullable=True)
     discount: float = Column(DECIMAL(3, 2), nullable=True)
