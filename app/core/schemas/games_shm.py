@@ -2,18 +2,31 @@ from pydantic import BaseModel
 from datetime import datetime
 
 
-class CreateGameOut(BaseModel):
-    id: str
+class CreateGame(BaseModel):
     title: str
     description: str
-    price: float
-    discount: float
+    price: float = 1
+    discount: float = 0
     image_path: str
     start_date: datetime = datetime.now().replace(microsecond=0)
 
 
 class UpdateGame(BaseModel):
     title: str
+    description: str = ''
+    price: float = 1
+    discount: float = 0
+
+
+class GameSchema(BaseModel):
+    id: int
+    title: str
     description: str
     price: float
     discount: float
+    image_path: str
+    start_date: datetime
+
+
+class Games(BaseModel):
+    result: list[GameSchema]
