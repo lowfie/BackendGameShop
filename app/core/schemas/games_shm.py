@@ -3,11 +3,10 @@ from datetime import datetime
 
 
 class CreateGameOut(BaseModel):
-    id: str
     title: str
     description: str
-    price: float
-    discount: float
+    price: float = 1
+    discount: float = 0
     image_path: str
     start_date: datetime = datetime.now().replace(microsecond=0)
 
