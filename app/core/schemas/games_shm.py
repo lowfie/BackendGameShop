@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from datetime import datetime
 
 
-class CreateGameOut(BaseModel):
+class CreateGame(BaseModel):
     title: str
     description: str
     price: float = 1
@@ -13,6 +13,20 @@ class CreateGameOut(BaseModel):
 
 class UpdateGame(BaseModel):
     title: str
+    description: str = ''
+    price: float = 1
+    discount: float = 0
+
+
+class GameSchema(BaseModel):
+    id: int
+    title: str
     description: str
     price: float
     discount: float
+    image_path: str
+    start_date: datetime
+
+
+class Games(BaseModel):
+    result: list[GameSchema]
