@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from fastapi.responses import JSONResponse
 
 from app.core.schemas.cart_shm import GetMyCart
@@ -63,7 +63,7 @@ async def delete_all_games_cart(user: User = Depends(current_user),
 
 
 @cart.delete('/delete_game_cart/')
-async def delete_game_byid_cart(game: list[int], user: User = Depends(current_user),
+async def delete_game_byid_cart(game: list[int] = Query(), user: User = Depends(current_user),
                                 session: AsyncSession = Depends(get_session)):
     await session.execute(delete(Cart).where(Cart.game_id.in_(game)))
     await session.commit()
