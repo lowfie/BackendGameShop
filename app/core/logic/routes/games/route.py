@@ -85,7 +85,7 @@ async def get_all_user_games(user: User = Depends(current_user),
     return JSONResponse(status_code=status.HTTP_200_OK, content={'result': user_games})
 
 
-@games.get('/get_game_by_id/', response_model=GameSchema)
+@games.get('/get_game_by_id/{game_id}', response_model=GameSchema)
 async def get_game_by_id(game_id: int, user: User = Depends(current_user),
                          session: AsyncSession = Depends(get_session)):
     game_by_id = (await session.execute(
