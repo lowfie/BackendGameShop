@@ -68,3 +68,11 @@ class Review(Base):
     title: str = Column(String(50), nullable=False)
     text: str = Column(Text, nullable=False)
     evaluation: float = Column(Float, nullable=False, default=1)
+
+
+class UserBalance(Base):
+    __tablename__ = 'user_balances'
+
+    id: int = Column(Integer, primary_key=True, nullable=False, default=0)
+    user_id: int = Column(Integer, ForeignKey('users.id'), nullable=False)
+    balance: float = Column(Float, nullable=False, default=0)
