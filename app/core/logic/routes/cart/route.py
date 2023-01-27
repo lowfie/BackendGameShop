@@ -18,8 +18,11 @@ current_user = fastapi_users.current_user()
 async def add_game_to_cart(game: int, user: User = Depends(current_user),
                            session: AsyncSession = Depends(get_session)):
     permissions = (await session.execute(
-        select(Game.id.label('is_exists'), Cart.game_id.label('is_game_added'))
+        select(Game.id.label('is_exists'),
+               Cart.game_id.label('is_game_added'),
+               UserGames.game_id.label('is_library'))
         .outerjoin(Cart)
+        .outerjoin(UserGames)
         .where(Game.id.__eq__(game))
     )).first()
 
@@ -27,6 +30,8 @@ async def add_game_to_cart(game: int, user: User = Depends(current_user),
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='GAME_NOT_FOUND')
     elif permissions['is_game_added']:
         raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED, detail='GAME_ALREADY_ADDED')
+    elif permissions['is_library']:
+        raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED, detail='GAME_ALREADY_PURCHASED')
 
     await session.execute(
         insert(Cart).values(
