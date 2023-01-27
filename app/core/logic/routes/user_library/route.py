@@ -14,7 +14,7 @@ current_user = fastapi_users.current_user()
 
 
 @library.get('/my_library/')
-async def deposit_balance(session: AsyncSession = Depends(get_session),
+async def get_all_purchased_games(session: AsyncSession = Depends(get_session),
                           user: User = Depends(current_user)):
     library_games = (await session.execute(
         select(Game.title,
