@@ -3,11 +3,11 @@ from fastapi.responses import JSONResponse
 
 from app.core.schemas.cart_shm import GetMyCart
 from app.core.logic.routes.auth.route import fastapi_users
-from app.core.database.models import Cart, User, Game
+from app.core.database.models import Cart, User, Game, UserBalance, UserGames
 from app.core.database.utils import get_session
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import insert, select, delete
+from sqlalchemy import insert, select, delete, func, update
 
 
 cart = APIRouter()
@@ -63,8 +63,61 @@ async def delete_all_games_cart(user: User = Depends(current_user),
 
 
 @cart.delete('/delete_game_cart/')
-async def delete_game_byid_cart(game: list[int] = Query(), user: User = Depends(current_user),
+async def delete_game_byid_cart(games: list[int] = Query(), user: User = Depends(current_user),
                                 session: AsyncSession = Depends(get_session)):
-    await session.execute(delete(Cart).where(Cart.game_id.in_(game)))
+    await session.execute(delete(Cart).where(Cart.game_id.in_(games)))
     await session.commit()
     return JSONResponse(status_code=status.HTTP_200_OK, content={'result': 'GAMES_WAS_DELETED'})
+
+
+@cart.patch('/buy_cart/')
+async def buy_all_products_cart(user: User = Depends(current_user),
+                                session: AsyncSession = Depends(get_session)):
+    remains = (await session.execute(
+        select(UserBalance.balance - func.sum(Game.price))
+        .where(UserBalance.user_id.__eq__(user.id))
+        .select_from(Cart)
+        .join(Game)
+        .group_by(UserBalance)
+    )).scalar()
+
+    if remains < 0:
+        raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED, detail={'result': 'INSUFFICIENT_FUNDS'})
+
+    await session.execute(update(UserBalance).values(balance=remains).where(UserBalance.user_id.__eq__(user.id)))
+    buy_games = (await session.execute(select(Cart.game_id).where(Cart.user_id.__eq__(user.id)))).all()
+    await session.execute(delete(Cart).where(Cart.user_id.__eq__(user.id)))
+    for game in buy_games:
+        await session.execute(insert(UserGames).values(user_id=user.id, game_id=game['game_id']))
+    await session.commit()
+
+    return JSONResponse(status_code=status.HTTP_200_OK, content={'result': 'PURCHASE_IS_SUCCESSFUL'})
+
+
+@cart.put('/buy_games_cart/')
+async def buy_products_cart(games: list[int] = Query(), user: User = Depends(current_user),
+                            session: AsyncSession = Depends(get_session)):
+    remains = (await session.execute(
+        select(UserBalance.balance - func.sum(Game.price))
+        .where(
+            UserBalance.user_id.__eq__(user.id),
+            Cart.game_id.in_(games)
+        )
+        .select_from(Cart)
+        .join(Game)
+        .group_by(UserBalance)
+    )).scalar()
+
+    if remains < 0:
+        raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED, detail={'result': 'INSUFFICIENT_FUNDS'})
+
+    await session.execute(update(UserBalance).values(balance=remains).where(UserBalance.user_id.__eq__(user.id)))
+    buy_games = (await session.execute(select(Cart.game_id).where(Cart.user_id.__eq__(user.id)))).all()
+    await session.execute(delete(Cart).where(Cart.game_id.in_(games)))
+    for game in buy_games:
+        await session.execute(insert(UserGames).values(user_id=user.id, game_id=game['game_id']))
+    await session.commit()
+
+    return JSONResponse(status_code=status.HTTP_200_OK, content={'result': 'PURCHASE_IS_SUCCESSFUL'})
+
+
