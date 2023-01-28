@@ -19,8 +19,6 @@ async def get_all_purchased_games(session: AsyncSession = Depends(get_session),
     library_games = (await session.execute(
         select(Game.title,
                Game.description,
-               Game.price,
-               Game.discount,
                Game.image_path,
                Game.start_date)
         .join(UserGames)
