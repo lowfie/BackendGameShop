@@ -62,7 +62,7 @@ async def update_game_by_id(game: UpdateGame, game_id: int, user: User = Depends
     return JSONResponse(status_code=status.HTTP_200_OK, content={'result': 'GAME_WAS_CHANGED'})
 
 
-@games.get('/get_created_games/', response_model=Games)
+@games.get('/created_games/', response_model=Games)
 async def get_all_created_games(user: User = Depends(current_user),
                                 session: AsyncSession = Depends(get_session)):
     user_games = (await session.execute(
@@ -80,7 +80,7 @@ async def get_all_created_games(user: User = Depends(current_user),
     return JSONResponse(status_code=status.HTTP_200_OK, content={'result': user_games})
 
 
-@games.get('/get_game_by_id/{game_id}', response_model=GameSchema)
+@games.get('/game_by_id/{game_id}', response_model=GameSchema)
 async def get_game_by_id(game_id: int, user: User = Depends(current_user),
                          session: AsyncSession = Depends(get_session)):
     game_by_id = (await session.execute(
