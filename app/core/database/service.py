@@ -6,7 +6,7 @@ from app.core.database.init import async_session
 
 class GamesMixin:
     @staticmethod
-    async def get_user_created_games(user_id: int):
+    async def user_created_games(user_id: int) -> list[int]:
         async with async_session() as session:
             user_games = (await session.execute(
                 select(Game.id)
