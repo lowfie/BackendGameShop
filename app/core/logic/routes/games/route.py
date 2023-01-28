@@ -33,7 +33,6 @@ async def add_game_to_shop(game: CreateGame, user: User = Depends(current_user),
             price=game.price,
             discount=game.discount,
             image_path=game.image_path,
-            start_date=game.start_date,
             user_id=user.id
         )
     )
