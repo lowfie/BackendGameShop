@@ -4,6 +4,7 @@ from fastapi.encoders import jsonable_encoder
 
 from app.core.logic.routes.auth.route import fastapi_users
 from app.core.database.models import User, UserGames, Game
+from app.core.schemas.library_shm import LibrarySchema
 from app.core.database.utils import get_session
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,9 +14,9 @@ library = APIRouter()
 current_user = fastapi_users.current_user()
 
 
-@library.get('/my_library/')
+@library.get('/my_library/', response_model=LibrarySchema)
 async def get_all_purchased_games(session: AsyncSession = Depends(get_session),
-                          user: User = Depends(current_user)):
+                                  user: User = Depends(current_user)):
     library_games = (await session.execute(
         select(Game.title,
                Game.description,
