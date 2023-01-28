@@ -13,6 +13,8 @@ from sqlalchemy import (
 from app.core.database.init import Base
 from fastapi_users.db import SQLAlchemyBaseUserTable
 
+from datetime import datetime
+
 
 class User(Base, SQLAlchemyBaseUserTable[int]):
     __tablename__ = 'users'
@@ -24,7 +26,7 @@ class User(Base, SQLAlchemyBaseUserTable[int]):
     phone: str = Column(String(20), nullable=True, unique=True)
     email: str = Column(String(length=320), unique=True, index=True, nullable=False)
     hashed_password: str = Column(String(length=1024), nullable=False)
-    date_of_registry = Column(DateTime, nullable=True)
+    date_of_registry: datetime = Column(DateTime, nullable=True, default=datetime.now().replace(microsecond=0))
     is_active: bool = Column(Boolean, default=True, nullable=False)
     is_superuser: bool = Column(Boolean, default=False, nullable=False)
     is_verified: bool = Column(Boolean, default=False, nullable=False)
@@ -40,7 +42,7 @@ class Game(Base):
     price: float = Column(Float, nullable=True)
     discount: float = Column(DECIMAL(3, 2), nullable=True)
     image_path: str = Column(Text, nullable=True)
-    start_date = Column(DateTime, nullable=True)
+    start_date: datetime = Column(DateTime, nullable=True, default=datetime.now().replace(microsecond=0))
 
 
 class UserGames(Base):
@@ -68,6 +70,8 @@ class Review(Base):
     title: str = Column(String(50), nullable=False)
     text: str = Column(Text, nullable=False)
     evaluation: float = Column(Float, nullable=False, default=1)
+    date_of_create: datetime = Column(nullable=True, default=datetime.now().replace(microsecond=0))
+    date_of_change: datetime = Column(nullable=True)
 
 
 class UserBalance(Base):
