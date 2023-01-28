@@ -19,8 +19,6 @@ async def deposit_balance(session: AsyncSession = Depends(get_session),
     library_games = (await session.execute(
         select(Game.title,
                Game.description,
-               Game.price,
-               Game.discount,
                Game.image_path,
                Game.start_date)
         .join(UserGames)
