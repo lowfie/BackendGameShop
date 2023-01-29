@@ -1,7 +1,8 @@
 from pydantic import BaseModel, validator
+from datetime import datetime
 
 
-class ReviewSchema(BaseModel):
+class ReviewToChange(BaseModel):
     game_id: int
     title: str
     text: str
@@ -14,3 +15,16 @@ class ReviewSchema(BaseModel):
         elif evaluation > 5 or evaluation < 1:
             raise ValueError('The score can be in the range from 1 to 5')
         return evaluation
+
+
+class ReviewUser(BaseModel):
+    game_id: int
+    title: str
+    text: str
+    evaluation: float
+    date_of_create: datetime
+    date_of_change: datetime
+
+
+class ReviewsUsers(BaseModel):
+    result: list[ReviewUser]
