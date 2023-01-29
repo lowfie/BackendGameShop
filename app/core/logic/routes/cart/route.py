@@ -87,7 +87,7 @@ async def buy_all_products_cart(user: User = Depends(current_user),
     )).scalar()
 
     if remains < 0:
-        raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED, detail={'result': 'INSUFFICIENT_FUNDS'})
+        raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED, detail='INSUFFICIENT_FUNDS')
 
     await session.execute(update(UserBalance).values(balance=remains).where(UserBalance.user_id.__eq__(user.id)))
     buy_games = (await session.execute(select(Cart.game_id).where(Cart.user_id.__eq__(user.id)))).all()
@@ -114,7 +114,7 @@ async def buy_products_cart(games: list[int] = Query(), user: User = Depends(cur
     )).scalar()
 
     if remains < 0:
-        raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED, detail={'result': 'INSUFFICIENT_FUNDS'})
+        raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED, detail='INSUFFICIENT_FUNDS')
 
     await session.execute(update(UserBalance).values(balance=remains).where(UserBalance.user_id.__eq__(user.id)))
     buy_games = (await session.execute(select(Cart.game_id).where(Cart.user_id.__eq__(user.id)))).all()
