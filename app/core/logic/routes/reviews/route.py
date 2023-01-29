@@ -3,7 +3,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
 from app.core.logic.routes.auth.route import fastapi_users
-from app.core.database.models import Review, User, Game, UserGames
+from app.core.database.models import Review, User, UserGames
 from app.core.schemas.reviews_shm import ReviewToChange, ReviewsUsers
 from app.core.database.utils import get_session
 
