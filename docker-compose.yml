@@ -1,0 +1,16 @@
+version: '3.9'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    image: gameapi
+    hostname: gameapi
+    container_name: gameapi
+    env_file:
+      - .env
+    command: >
+      bash -c "alembic upgrade head && python main.py"
