@@ -7,9 +7,9 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
-    image: myweb
-    hostname: myweb
-    container_name: myweb
+    image: gameapi
+    hostname: gameapi
+    container_name: gameapi
     env_file:
       - .env
     command: >
