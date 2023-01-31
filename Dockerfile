@@ -1,8 +1,12 @@
 FROM python:3.10.6
 
-COPY . .
-WORKDIR .
 EXPOSE 8000
 
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+WORKDIR /usr/src/app
+
+COPY . .
+
+RUN apt update \
+    && apt upgrade -y \
+    && pip install --upgrade pip \
+    && pip install -r requirements.txt

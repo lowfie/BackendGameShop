@@ -5,12 +5,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: >
-      bash -c "alembic upgrade head && python main.py"
     ports:
-      - 8000:8000
+      - "8000:8000"
     image: myweb
     hostname: myweb
     container_name: myweb
     env_file:
       - .env
+    command: >
+      bash -c "alembic upgrade head && python main.py"
