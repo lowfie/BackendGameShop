@@ -27,5 +27,10 @@ class GameSchema(BaseModel):
     start_date: datetime
 
 
+class SetGameDiscount(BaseModel):
+    game_id: int
+    discount: float
+
+
 class Games(BaseModel):
     result: list[GameSchema]
