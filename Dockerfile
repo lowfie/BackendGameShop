@@ -6,7 +6,4 @@ WORKDIR /usr/src/app
 
 COPY . .
 
-RUN apt update \
-    && apt upgrade -y \
-    && pip install --upgrade pip \
-    && pip install -r requirements.txt
+RUN pip install --upgrade pip && pip install -r requirements.txt
