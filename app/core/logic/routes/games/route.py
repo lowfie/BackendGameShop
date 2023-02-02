@@ -3,10 +3,17 @@ from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 
 from app.core.logic.routes.auth.route import fastapi_users
-from app.core.schemas.games_shm import CreateGame, UpdateGame, Games, GameSchema
 from app.core.database.models import Game, User
 from app.core.database.utils import get_session
 from app.core.database.service import GamesMixin
+from app.core.schemas.games_shm import (
+    CreateGame,
+    UpdateGame,
+    Games,
+    GameSchema,
+    SetGameDiscount
+)
+
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import insert, select, update, delete
@@ -111,3 +118,16 @@ async def delete_user_game(game_id: int, user: User = Depends(current_user),
     await session.commit()
     return JSONResponse(status_code=status.HTTP_200_OK, content={"result": "GAME_WAS_DELETED"})
 
+
+@games.patch('/set_game_discount/')
+async def set_game_price_discount(
+        game_discount: SetGameDiscount,
+        user: User = Depends(current_user),
+        session: AsyncSession = Depends(get_session)
+):
+    price = (await session.execute(
+        select(Game.price)
+        .where(Game.id.__eq__(game_discount.game_id))
+    )).scalar()
+
+    return price
