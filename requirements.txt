@@ -8,8 +8,11 @@ alembic==1.9.2
 environs==9.5.0
 fastapi-users==10.3.0
 fastapi-users-db-sqlalchemy==4.0.4
+
+# background tasks
 flower==1.2.0
 celery==5.2.7
+redis==4.4.2
 
 # tests
 pytest==7.2.1
