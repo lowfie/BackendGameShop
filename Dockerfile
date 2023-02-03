@@ -6,7 +6,5 @@ WORKDIR /usr/src/app
 
 COPY . .
 
-RUN apt update \
-    && apt upgrade -y \
-    && pip install --upgrade pip \
-    && pip install -r requirements.txt
+RUN pip install --upgrade pip && pip install -r requirements.txt
+CMD ["celery", "-A", "app.core.tasks.send_mail:celery", "worker", "--loglevel=INFO"]

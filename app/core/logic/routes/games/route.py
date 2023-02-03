@@ -3,10 +3,17 @@ from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 
 from app.core.logic.routes.auth.route import fastapi_users
-from app.core.schemas.games_shm import CreateGame, UpdateGame, Games, GameSchema
-from app.core.database.models import Game, User
+from app.core.database.models import Game, User, Cart
 from app.core.database.utils import get_session
 from app.core.database.service import GamesMixin
+from app.core.schemas.games_shm import (
+    CreateGame,
+    UpdateGame,
+    Games,
+    GameSchema,
+    SetGameDiscount
+)
+from app.core.tasks.send_mail import send_mail_game_discount
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import insert, select, update, delete
@@ -111,3 +118,86 @@ async def delete_user_game(game_id: int, user: User = Depends(current_user),
     await session.commit()
     return JSONResponse(status_code=status.HTTP_200_OK, content={"result": "GAME_WAS_DELETED"})
 
+
+@games.patch('/set_game_discount/')
+async def set_game_price_discount(
+        game_discount: SetGameDiscount,
+        user: User = Depends(current_user),
+        session: AsyncSession = Depends(get_session)
+):
+    game_params = (await session.execute(
+        select(Game.title, Game.price, Game.discount)
+        .where(Game.id.__eq__(game_discount.game_id), Game.user_id.__eq__(user.id))
+    )).first()
+
+    if game_params is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='GAME_NOT_FOUND'
+        )
+    elif game_params['discount'] != 0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='DISCOUNT_ALREADY_ADDED'
+        )
+
+    price_on_discount = game_params['price'] * (1 - game_discount.discount)
+
+    await session.execute(
+        update(Game).values(price=price_on_discount, discount=game_discount.discount)
+        .where(Game.id.__eq__(game_discount.game_id))
+    )
+    await session.commit()
+    game_data = {
+        'title': game_params['title'],
+        'price': price_on_discount,
+        'discount': game_discount.discount
+    }
+
+    notify_emails = (await session.execute(
+        select(User.email)
+        .join(Cart)
+        .where(Cart.game_id.__eq__(game_discount.game_id))
+        .distinct()
+    )).all()
+
+    for email in notify_emails:
+        send_mail_game_discount(game_data, email)
+
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={'result': 'DISCOUNT_SUCCESSFULLY_ADDED'}
+    )
+
+
+@games.patch('/remove_game_discount/')
+async def set_nullable_game_discount(
+        game_id: int,
+        user: User = Depends(current_user),
+        session: AsyncSession = Depends(get_session)
+):
+    game_params = (await session.execute(
+        select(Game.price, Game.discount)
+        .where(Game.id.__eq__(game_id), Game.user_id.__eq__(user.id))
+    )).first()
+
+    if game_params is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='GAME_NOT_FOUND'
+        )
+    elif game_params['discount'] == 0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='DISCOUNT_HAS_NOT_BEEN_ADDED'
+        )
+    price_without_discount = game_params['price'] / (1 - float(game_params['discount']))
+    await session.execute(
+        update(Game)
+        .values(price=price_without_discount, discount=0.0)
+        .where(Game.id.__eq__(game_id)))
+    await session.commit()
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={'result': 'DISCOUNT_SUCCESSFULLY_REMOVED'}
+    )

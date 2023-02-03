@@ -14,3 +14,21 @@ services:
       - .env
     command: >
       bash -c "alembic upgrade head && python main.py"
+    depends_on:
+      - redis
+      
+  redis:
+    image: redis:7.0.8
+    container_name: gameapi_redis
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "${PORT_REDIS}:${PORT_REDIS}"
+    networks:
+      - "GameShopApi-net"
+
+networks:
+  GameShopApi-net:
+    driver: bridge
+    name: GameShopApi-net
