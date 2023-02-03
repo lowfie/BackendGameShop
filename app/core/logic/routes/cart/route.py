@@ -15,7 +15,7 @@ current_user = fastapi_users.current_user()
 
 
 @cart.post('/add_to_cart/')
-async def add_game_to_cart(game: int, user: User = Depends(current_user),
+async def add_game_to_cart(game_id: int, user: User = Depends(current_user),
                            session: AsyncSession = Depends(get_session)):
     permissions = (await session.execute(
         select(Game.id.label('is_exists'),
@@ -23,7 +23,7 @@ async def add_game_to_cart(game: int, user: User = Depends(current_user),
                UserGames.game_id.label('is_library'))
         .outerjoin(Cart)
         .outerjoin(UserGames)
-        .where(Game.id.__eq__(game))
+        .where(Game.id.__eq__(game_id))
     )).first()
 
     if permissions is None:
@@ -36,7 +36,7 @@ async def add_game_to_cart(game: int, user: User = Depends(current_user),
     await session.execute(
         insert(Cart).values(
             user_id=user.id,
-            game_id=game
+            game_id=game_id
         )
     )
     await session.commit()
